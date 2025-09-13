@@ -17,7 +17,7 @@ const resumeRoutes = require('./routes/resume');
 const indexRoutes = require('./routes/index');
 
 // Import AI Agent routes (will be created)
-const aiAgentRoutes = require('./routes/aiAgent');
+// const aiAgentRoutes = require('./routes/aiAgent'); // Commented out - file deleted
 
 const app = express();
 
@@ -44,7 +44,7 @@ app.use('/api/mint', mintRoutes);
 app.use('/api/networking', networkingRoutes);
 app.use('/api/social', socialRoutes);
 app.use('/api/resume', resumeRoutes);
-app.use('/api/ai-agent', aiAgentRoutes);
+// app.use('/api/ai-agent', aiAgentRoutes); // Commented out - route deleted
 app.use('/', indexRoutes);
 
 // Health check endpoint
