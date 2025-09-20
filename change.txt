@@ -1,0 +1,7 @@
+bulk upload       -->  should we make a class(name of the intistute) to join or something else
+certificate local to mongoDB 
+mata data in mongoDB
+OCR 
+Physical to digital  -->  QR to upload certificate  (who will do this student or institude)
+include web3Auth for easy accound creation
+certificate id to share in linkdin like platform(first in linkdin then we'll think about other)
