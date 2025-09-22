@@ -15,6 +15,7 @@ const networkingRoutes = require('./routes/networking');
 const socialRoutes = require('./routes/social');
 const resumeRoutes = require('./routes/resume');
 const indexRoutes = require('./routes/index');
+const bulkRoutes = require('./routes/bulk');
 
 // Import AI Agent routes (will be created)
 // const aiAgentRoutes = require('./routes/aiAgent'); // Commented out - file deleted
@@ -44,6 +45,7 @@ app.use('/api/mint', mintRoutes);
 app.use('/api/networking', networkingRoutes);
 app.use('/api/social', socialRoutes);
 app.use('/api/resume', resumeRoutes);
+app.use('/api/bulk', bulkRoutes);
 // app.use('/api/ai-agent', aiAgentRoutes); // Commented out - route deleted
 app.use('/', indexRoutes);
 
