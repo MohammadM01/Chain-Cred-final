@@ -19,6 +19,7 @@ const crypto = require('crypto');
  */
 
 const upload = multer({ storage: multer.memoryStorage() });
+const uploadMulti = multer({ storage: multer.memoryStorage() });
 
 // GET /api/bulk/template
 router.get('/template', (req, res) => {
@@ -97,9 +98,12 @@ module.exports = router;
 
 // POST /api/bulk/mint
 // Body: { issuerWallet: string, issuerName?: string, rows: [{ studentName, studentWallet }] }
-router.post('/mint', async (req, res) => {
+router.post('/mint', uploadMulti.single('pdf'), async (req, res) => {
   try {
-    const { issuerWallet, issuerName, rows } = req.body || {};
+    let { issuerWallet, issuerName, rows } = req.body || {};
+    if (typeof rows === 'string') {
+      try { rows = JSON.parse(rows); } catch { rows = []; }
+    }
     if (!issuerWallet || !ethers.isAddress(issuerWallet)) {
       return res.status(400).json({ success: false, error: 'Valid issuerWallet is required' });
     }
@@ -127,8 +131,8 @@ router.post('/mint', async (req, res) => {
       }
 
       try {
-        // Generate a simple PDF certificate (MVP template)
-        const pdfBuffer = await new Promise((resolve, reject) => {
+        // Use provided PDF if uploaded, otherwise generate a simple one
+        const pdfBuffer = req.file?.buffer ? req.file.buffer : await new Promise((resolve, reject) => {
           const doc = new PDFDocument({ margin: 50 });
           const buffers = [];
           doc.on('data', b => buffers.push(b));
@@ -192,6 +196,110 @@ router.post('/mint', async (req, res) => {
         item.metadataUrl = metadataUrl;
         item.tokenId = tokenId;
         item.txHash = txHash;
+        results.push(item);
+      } catch (e) {
+        item.status = 'error';
+        item.error = e.message;
+        results.push(item);
+      }
+    }
+
+    return res.json({ success: true, data: { results } });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// POST /api/bulk/issue (no minting)
+// Body: { issuerWallet: string, issuerName?: string, rows: [{ studentName, studentWallet }] }
+router.post('/issue', uploadMulti.single('pdf'), async (req, res) => {
+  try {
+    let { issuerWallet, issuerName, rows } = req.body || {};
+    if (typeof rows === 'string') {
+      try { rows = JSON.parse(rows); } catch { rows = []; }
+    }
+    if (!issuerWallet || !ethers.isAddress(issuerWallet)) {
+      return res.status(400).json({ success: false, error: 'Valid issuerWallet is required' });
+    }
+    if (!Array.isArray(rows) || rows.length === 0) {
+      return res.status(400).json({ success: false, error: 'rows array is required' });
+    }
+
+    // Role check
+    const issuer = await User.findOne({ wallet: issuerWallet.toLowerCase() });
+    if (!issuer || issuer.role !== 'institute') {
+      return res.status(403).json({ success: false, error: 'Only institutes can issue' });
+    }
+
+    const results = [];
+    for (const row of rows) {
+      const studentName = (row.studentName || '').toString().trim();
+      const studentWallet = (row.studentWallet || '').toString().trim();
+      const item = { studentName, studentWallet };
+
+      if (!studentName || !ethers.isAddress(studentWallet)) {
+        item.status = 'skipped';
+        item.error = 'Invalid row';
+        results.push(item);
+        continue;
+      }
+
+      try {
+        // Use provided PDF if uploaded, otherwise generate a simple one
+        const pdfBuffer = req.file?.buffer ? req.file.buffer : await new Promise((resolve, reject) => {
+          const doc = new PDFDocument({ margin: 50 });
+          const buffers = [];
+          doc.on('data', b => buffers.push(b));
+          doc.on('end', () => resolve(Buffer.concat(buffers)));
+          doc.font('Helvetica-Bold').fontSize(24).text('Certificate of Achievement', { align: 'center' });
+          doc.moveDown();
+          doc.font('Helvetica').fontSize(14).text('Presented to', { align: 'center' });
+          doc.moveDown(0.5);
+          doc.font('Helvetica-Bold').fontSize(22).text(studentName, { align: 'center' });
+          doc.moveDown();
+          doc.font('Helvetica').fontSize(12).text(`Issued by ${issuerName || issuer.name || 'Institute'}`, { align: 'center' });
+          doc.moveDown(2);
+          doc.fontSize(10).text(`Wallet: ${studentWallet}`, { align: 'center' });
+          doc.end();
+        });
+
+        // Upload PDF
+        const pdfUpload = await uploadToGreenfield(pdfBuffer, `${crypto.randomBytes(8).toString('hex')}.pdf`);
+        const fileUrl = pdfUpload.url;
+        const fileHash = pdfUpload.hash;
+
+        // Create metadata
+        const metadata = generateMetadata(
+          studentWallet.toLowerCase(),
+          issuerWallet.toLowerCase(),
+          fileUrl,
+          fileHash,
+          studentName,
+          issuerName || issuer.name
+        );
+
+        // Upload metadata JSON
+        const metadataBuffer = Buffer.from(JSON.stringify(metadata));
+        const metadataUpload = await uploadToGreenfield(metadataBuffer, `${metadata.certificateID}.json`, true);
+        const metadataUrl = metadataUpload.url;
+
+        // Save DB document (pending)
+        const certificate = new Certificate({
+          certificateID: metadata.certificateID,
+          studentWallet: studentWallet.toLowerCase(),
+          issuerWallet: issuerWallet.toLowerCase(),
+          fileUrl,
+          metadataUrl,
+          fileHash,
+          issuedDate: new Date(metadata.issuedDateISO),
+          status: 'pending'
+        });
+        await certificate.save();
+
+        item.status = 'issued';
+        item.metadataUrl = metadataUrl;
+        item.fileUrl = fileUrl;
+        item.certificateID = metadata.certificateID;
         results.push(item);
       } catch (e) {
         item.status = 'error';

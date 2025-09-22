@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
 import api, { BASE_URL } from '../utils/api';
 import Header from '../components/Header';
+import { useUser } from '../context/UserContext';
 
 export default function BulkIssuance() {
+  const { user } = useUser();
   const [file, setFile] = useState(null);
+  const [pdf, setPdf] = useState(null);
   const [rows, setRows] = useState([]);
   const [stats, setStats] = useState(null);
   const [estimate, setEstimate] = useState(null);
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const downloadTemplate = () => {
     window.location.href = `${BASE_URL}/api/bulk/template`;
@@ -64,31 +68,7 @@ export default function BulkIssuance() {
     }
   };
 
-  const runBulkMint = async () => {
-    try {
-      if (!stats || !rows?.length) return;
-      setLoading(true);
-      setError(null);
-
-      // take only valid rows
-      const valid = rows.filter(r => !r.errors || r.errors.length === 0).map(r => ({ studentName: r.studentName, studentWallet: r.studentWallet }));
-      if (valid.length === 0) {
-        setError('No valid rows to mint');
-        return;
-      }
-
-      // For MVP, ask issuerWallet via prompt; ideally use logged-in user context
-      const issuerWallet = window.prompt('Enter issuer wallet address to sign as (must match institute user)');
-      if (!issuerWallet) return;
-
-      const res = await api.post('/api/bulk/mint', { issuerWallet, rows: valid });
-      setResults(res.data.data.results);
-    } catch (e) {
-      setError(e.response?.data?.error || e.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // minting now handled inside the modal submit with proper multipart form (includes optional PDF)
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -122,9 +102,18 @@ export default function BulkIssuance() {
           </div>
         </div>
 
-        <div className="bg-gray-900 rounded p-6">
-          <h2 className="text-xl font-semibold mb-4">Upload CSV</h2>
-          <input type="file" accept=".csv" onChange={(e) => setFile(e.target.files?.[0] || null)} className="mb-4" />
+          <div className="bg-gray-900 rounded p-6">
+          <h2 className="text-xl font-semibold mb-4">Upload Files</h2>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <div className="text-sm text-gray-400 mb-1">CSV (required)</div>
+              <input type="file" accept=".csv" onChange={(e) => setFile(e.target.files?.[0] || null)} className="mb-4" />
+            </div>
+            <div>
+              <div className="text-sm text-gray-400 mb-1">Certificate PDF (optional, applied to all)</div>
+              <input type="file" accept="application/pdf" onChange={(e) => setPdf(e.target.files?.[0] || null)} className="mb-4" />
+            </div>
+          </div>
           <button disabled={loading} onClick={handleValidate} className="px-4 py-2 bg-blue-600 rounded disabled:opacity-50">{loading ? 'Validating…' : 'Validate & Estimate'}</button>
           {error && <div className="mt-3 text-red-400">{error}</div>}
         </div>
@@ -180,7 +169,60 @@ export default function BulkIssuance() {
             <div className="text-gray-300">Gas price (gwei): {estimate.gasPriceGwei}</div>
             <div className="text-gray-300">Total gas: {estimate.totalGas}</div>
             <div className="text-white font-bold">Approx tBNB required: {estimate.totalBNB.toFixed(6)}</div>
-            <button disabled={loading} onClick={runBulkMint} className="mt-4 px-4 py-2 bg-purple-600 rounded disabled:opacity-50">{loading ? 'Minting…' : 'Run Bulk Mint'}</button>
+            <div className="mt-2 text-xs text-gray-400">Tip: "Issue Only" creates certificates (PDF + metadata) without minting. "Confirm & Mint" will mint NFTs to student wallets referencing those certificates.</div>
+            <div className="flex gap-3 mt-4">
+              <button disabled={loading} onClick={() => setConfirmOpen(true)} className="px-4 py-2 bg-purple-600 rounded disabled:opacity-50">{loading ? 'Minting…' : 'Confirm & Mint (NFT)'}</button>
+              <button disabled={loading} onClick={async ()=>{
+                try {
+                  if (!stats || !rows?.length) return;
+                  setLoading(true);
+                  setError(null);
+                  const valid = rows.filter(r => !r.errors || r.errors.length === 0).map(r => ({ studentName: r.studentName, studentWallet: r.studentWallet }));
+                  if (valid.length === 0) { setError('No valid rows to issue'); return; }
+                  const issuerWallet = user?.wallet; const issuerName = user?.name;
+                  const form = new FormData();
+                  form.append('issuerWallet', issuerWallet);
+                  if (issuerName) form.append('issuerName', issuerName);
+                  form.append('rows', JSON.stringify(valid));
+                  if (pdf) form.append('pdf', pdf);
+                  const res = await api.post('/api/bulk/issue', form, { headers: { 'Content-Type': 'multipart/form-data' } });
+                  setResults(res.data.data.results);
+                } catch(e) { setError(e.response?.data?.error || e.message); } finally { setLoading(false); }
+              }} className="px-4 py-2 border border-gray-600 rounded disabled:opacity-50">Issue Only (no mint)</button>
+            </div>
+          </div>
+        )}
+
+        {confirmOpen && (
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+            <div className="bg-gray-900 rounded p-6 w-full max-w-md">
+              <h3 className="text-lg font-semibold mb-2">Confirm Bulk Mint</h3>
+              <p className="text-gray-300 mb-4">You're about to mint for <span className="text-[#f3ba2f] font-semibold">{stats?.valid || 0}</span> valid rows.</p>
+              <div className="bg-gray-800 rounded p-3 text-sm mb-4">
+                <div className="text-gray-400">Issuer Wallet</div>
+                <div className="font-mono">{user?.wallet}</div>
+              </div>
+              <div className="flex justify-end gap-2">
+                <button onClick={()=> setConfirmOpen(false)} className="px-3 py-2 border border-gray-600 rounded">Cancel</button>
+                <button onClick={async ()=>{
+                  try {
+                    if (!stats || !rows?.length) return;
+                    setLoading(true);
+                    setError(null);
+                    const valid = rows.filter(r => !r.errors || r.errors.length === 0).map(r => ({ studentName: r.studentName, studentWallet: r.studentWallet }));
+                    if (valid.length === 0) { setError('No valid rows to mint'); return; }
+                    const issuerWallet = user?.wallet; const issuerName = user?.name;
+                    const form = new FormData();
+                    form.append('issuerWallet', issuerWallet);
+                    if (issuerName) form.append('issuerName', issuerName);
+                    form.append('rows', JSON.stringify(valid));
+                    if (pdf) form.append('pdf', pdf);
+                    const res = await api.post('/api/bulk/mint', form, { headers: { 'Content-Type': 'multipart/form-data' } });
+                    setResults(res.data.data.results);
+                  } catch(e) { setError(e.response?.data?.error || e.message); } finally { setLoading(false); setConfirmOpen(false); }
+                }} className="px-3 py-2 bg-purple-600 rounded">Confirm & Mint</button>
+              </div>
+            </div>
           </div>
         )}
 
@@ -195,6 +237,8 @@ export default function BulkIssuance() {
                   <th className="py-2 px-3">Status</th>
                   <th className="py-2 px-3">Token ID</th>
                   <th className="py-2 px-3">Tx Hash</th>
+                  <th className="py-2 px-3">PDF</th>
+                  <th className="py-2 px-3">Metadata</th>
                   <th className="py-2 px-3">Error</th>
                 </tr>
               </thead>
@@ -206,6 +250,8 @@ export default function BulkIssuance() {
                     <td className="py-2 px-3">{r.status}</td>
                     <td className="py-2 px-3">{r.tokenId || '-'}</td>
                     <td className="py-2 px-3 font-mono break-all text-[#f3ba2f]">{r.txHash || '-'}</td>
+                    <td className="py-2 px-3">{r.fileUrl ? <a className="text-[#f3ba2f]" href={r.fileUrl} target="_blank" rel="noreferrer">PDF</a> : '-'}</td>
+                    <td className="py-2 px-3">{r.metadataUrl ? <a className="text-[#f3ba2f]" href={r.metadataUrl} target="_blank" rel="noreferrer">JSON</a> : '-'}</td>
                     <td className="py-2 px-3 text-red-400">{r.error || ''}</td>
                   </tr>
                 ))}
