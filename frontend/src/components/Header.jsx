@@ -53,6 +53,14 @@ export default function Header() {
           >
             Profile
           </Link>
+          {user && user.role === 'institute' && (
+            <Link 
+              to="/bulk" 
+              className={getNavLinkClasses('/bulk')}
+            >
+              Bulk
+            </Link>
+          )}
           {user && user.role === 'student' && ( // NEW: Conditional for student only
             <Link 
               to="/resume-builder" 

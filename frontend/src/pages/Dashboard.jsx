@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import { useUser } from '../context/UserContext';
 import axios from '../utils/api';
 
 export default function Dashboard(){
   const { user, showToast } = useUser();
+  const navigate = useNavigate();
   const [uploading, setUploading] = useState(false);
   const [minting, setMinting] = useState(false);
   const [studentWallet, setStudentWallet] = useState('');
@@ -86,6 +88,9 @@ export default function Dashboard(){
       <div className="min-h-screen bg-black text-white">
         <Header />
         <div className="p-8 space-y-8">
+          <div className="flex justify-end">
+            <button onClick={()=> navigate('/bulk')} className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded">📦 Bulk Issuance</button>
+          </div>
           <div className="bg-gray-900 p-6 rounded">
             <h3 className="text-xl font-semibold">Upload PDF</h3>
             <form className="mt-4 space-y-3" onSubmit={handleUpload}>

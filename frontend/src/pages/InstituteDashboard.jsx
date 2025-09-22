@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import api from '../utils/api';
 import NFTCard from '../components/NFTCard';
@@ -7,6 +8,7 @@ import UploadForm from '../components/UploadForm';
 
 export default function InstituteDashboard() {
   const { user } = useUser();
+  const navigate = useNavigate();
   const [certificates, setCertificates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -21,7 +23,7 @@ export default function InstituteDashboard() {
   const fetchCertificates = async () => {
     try {
       setLoading(true);
-      const response = await api.get(`/certificates/institute/${user.wallet}`);
+      const response = await api.get(`/api/certificates/institute/${user.wallet}`);
       setCertificates(response.data.data || []);
       setError(null);
     } catch (err) {
@@ -74,6 +76,12 @@ export default function InstituteDashboard() {
             className="bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center gap-2"
           >
             📤 Upload New Certificate
+          </button>
+          <button
+            onClick={() => navigate('/bulk')}
+            className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center gap-2"
+          >
+            📦 Bulk Issuance
           </button>
           <button
             onClick={refreshCertificates}
