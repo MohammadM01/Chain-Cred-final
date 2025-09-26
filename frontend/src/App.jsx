@@ -13,6 +13,7 @@ const DashboardBinance = lazy(() => import('./pages/DashboardBinance'));
 const SignIn = lazy(() => import('./pages/SignIn'));
 const NetworkingAgent = lazy(() => import('./components/NetworkingAgent'));
 const BulkIssuance = lazy(() => import('./pages/BulkIssuance'));
+const OCRVerification = lazy(() => import('./pages/OCRVerification'));
 
 export default function App() {
   return (
@@ -31,6 +32,7 @@ export default function App() {
         <Route path="/resume-builder" element={<ResumeBuilder />} />
         <Route path="/networking" element={<NetworkingAgent />} />
         <Route path="/bulk" element={<BulkIssuance />} />
+        <Route path="/ocr" element={<OCRVerification />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Suspense>
