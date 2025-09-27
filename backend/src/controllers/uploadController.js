@@ -22,7 +22,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 const uploadCertificate = async (req, res) => {
   try {
     // Assume issuerWallet is from authenticated user; for MVP, passed in body
-    const { studentWallet, issuerWallet } = req.body;
+    const { studentWallet, issuerWallet, language = 'en' } = req.body;
 
     if (!req.file || !studentWallet || !issuerWallet) {
       return res.status(400).json({ success: false, error: 'File, studentWallet, and issuerWallet are required' });
@@ -49,14 +49,15 @@ const uploadCertificate = async (req, res) => {
     const fileUrl = pdfUpload.url;
     const fileHash = pdfUpload.hash;
 
-    // Generate metadata with names
+    // Generate metadata with names and language
     const metadata = generateMetadata(
       studentWallet.toLowerCase(), 
       issuerWallet.toLowerCase(), 
       fileUrl, 
       fileHash,
       student.name,
-      issuer.name
+      issuer.name,
+      language
     );
 
     // Upload metadata JSON to Greenfield

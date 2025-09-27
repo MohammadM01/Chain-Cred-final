@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import api from '../utils/api';
+import { useTranslation } from 'react-i18next';
 
 export default function UploadForm({ onSuccess, issuerWallet }) {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     studentWallet: '',
-    file: null
+    file: null,
+    language: 'en'
   });
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
@@ -25,6 +28,7 @@ export default function UploadForm({ onSuccess, issuerWallet }) {
       formDataToSend.append('studentWallet', formData.studentWallet);
       formDataToSend.append('issuerWallet', issuerWallet);
       formDataToSend.append('file', formData.file);
+      formDataToSend.append('language', formData.language);
 
       const response = await api.post('/upload', formDataToSend, {
         headers: {
@@ -34,7 +38,7 @@ export default function UploadForm({ onSuccess, issuerWallet }) {
 
       if (response.data.success) {
         console.log('Upload successful:', response.data.data);
-        setFormData({ studentWallet: '', file: null });
+        setFormData({ studentWallet: '', file: null, language: 'en' });
         onSuccess();
       } else {
         setError(response.data.error || 'Upload failed');
@@ -71,6 +75,21 @@ export default function UploadForm({ onSuccess, issuerWallet }) {
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           required
         />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Certificate Language
+        </label>
+        <select
+          value={formData.language}
+          onChange={(e) => setFormData(prev => ({ ...prev, language: e.target.value }))}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="en">English</option>
+          <option value="hi">हिन्दी (Hindi)</option>
+        </select>
+        <p className="text-xs text-gray-500 mt-1">Select the language for certificate generation</p>
       </div>
 
       <div>

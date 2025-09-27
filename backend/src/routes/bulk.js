@@ -100,7 +100,7 @@ module.exports = router;
 // Body: { issuerWallet: string, issuerName?: string, rows: [{ studentName, studentWallet }] }
 router.post('/mint', uploadMulti.single('pdf'), async (req, res) => {
   try {
-    let { issuerWallet, issuerName, rows } = req.body || {};
+    let { issuerWallet, issuerName, rows, language = 'en' } = req.body || {};
     if (typeof rows === 'string') {
       try { rows = JSON.parse(rows); } catch { rows = []; }
     }
@@ -154,14 +154,15 @@ router.post('/mint', uploadMulti.single('pdf'), async (req, res) => {
         const fileUrl = pdfUpload.url;
         const fileHash = pdfUpload.hash;
 
-        // Create metadata
+        // Create metadata with language support
         const metadata = generateMetadata(
           studentWallet.toLowerCase(),
           issuerWallet.toLowerCase(),
           fileUrl,
           fileHash,
           studentName,
-          issuerName || issuer.name
+          issuerName || issuer.name,
+          language
         );
 
         // Upload metadata JSON
@@ -268,14 +269,15 @@ router.post('/issue', uploadMulti.single('pdf'), async (req, res) => {
         const fileUrl = pdfUpload.url;
         const fileHash = pdfUpload.hash;
 
-        // Create metadata
+        // Create metadata with language support
         const metadata = generateMetadata(
           studentWallet.toLowerCase(),
           issuerWallet.toLowerCase(),
           fileUrl,
           fileHash,
           studentName,
-          issuerName || issuer.name
+          issuerName || issuer.name,
+          language
         );
 
         // Upload metadata JSON

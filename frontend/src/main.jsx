@@ -2,8 +2,10 @@ import React, { Component } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import './index.css';
+import './i18n';
 import App from './App';
 import { UserProvider } from './context/UserContext';
+import { LanguageProvider } from './context/LanguageContext';
 
 class ErrorBoundary extends Component {
   state = { hasError: false, error: null };
@@ -38,9 +40,11 @@ root.render(
   <React.StrictMode>
     <BrowserRouter>
       <ErrorBoundary>
-        <UserProvider>
-          <App />
-        </UserProvider>
+        <LanguageProvider>
+          <UserProvider>
+            <App />
+          </UserProvider>
+        </LanguageProvider>
       </ErrorBoundary>
     </BrowserRouter>
   </React.StrictMode>

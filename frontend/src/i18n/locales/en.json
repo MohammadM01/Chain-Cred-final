@@ -1,0 +1,198 @@
+{
+  "common": {
+    "home": "Home",
+    "verify": "Verify",
+    "dashboard": "Dashboard",
+    "profile": "Profile",
+    "bulk": "Bulk",
+    "resume": "Resume",
+    "networking": "Networking",
+    "signIn": "Sign In",
+    "logout": "Logout",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "upload": "Upload",
+    "download": "Download",
+    "share": "Share",
+    "copy": "Copy",
+    "search": "Search",
+    "filter": "Filter",
+    "clear": "Clear",
+    "submit": "Submit",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "close": "Close",
+    "open": "Open",
+    "view": "View",
+    "details": "Details",
+    "status": "Status",
+    "date": "Date",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Address",
+    "description": "Description",
+    "valid": "Valid",
+    "invalid": "Invalid",
+    "unknown": "Unknown"
+  },
+  "header": {
+    "title": "ChainCred",
+    "subtitle": "Fraud-proof credentials with blockchain technology"
+  },
+  "landing": {
+    "hero": {
+      "title": "Fraud-proof credentials with ChainCred 🚀",
+      "subtitle": "Tamper-proof, decentralized, verifiable on opBNB + Greenfield.",
+      "getStarted": "Get Started",
+      "verifyCredential": "Verify a Credential"
+    },
+    "quickVerify": {
+      "title": "🔍 Quick Verify",
+      "placeholder": "Certificate ID or Wallet",
+      "verify": "Verify",
+      "checking": "Checking...",
+      "validCredential": "✅ Valid credential — {{certificateId}}",
+      "student": "Student: {{name}}",
+      "issuer": "Issuer: {{name}}",
+      "invalidCredential": "❌ Invalid — {{error}}"
+    },
+    "howItWorks": {
+      "title": "How It Works",
+      "step1": "Create Wallet & Register",
+      "step2": "Institute Uploads Certificate",
+      "step3": "Mint Credential NFT on opBNB",
+      "step4": "Instant Verification Anywhere"
+    },
+    "benefits": {
+      "title": "Who Benefits?",
+      "universities": {
+        "title": "Universities",
+        "description": "Issue tamper-proof diplomas & transcripts."
+      },
+      "employers": {
+        "title": "Employers",
+        "description": "Verify candidate credentials instantly."
+      },
+      "students": {
+        "title": "Students",
+        "description": "Prove achievements with NFT-based certificates."
+      }
+    },
+    "faq": {
+      "title": "FAQs",
+      "privacy": {
+        "question": "🔒 Are my credentials private?",
+        "answer": "Yes. Sensitive data is stored securely on Greenfield, while only proofs go on-chain."
+      },
+      "opbnb": {
+        "question": "⚡ Why use opBNB?",
+        "answer": "opBNB ensures fast, low-cost, and scalable verification for institutions & students."
+      },
+      "soulbound": {
+        "question": "🎯 What are Soulbound NFTs?",
+        "answer": "They're non-transferable NFTs that prove ownership of credentials—no one else can claim them."
+      }
+    },
+    "cta": {
+      "title": "Ready to secure your credentials?",
+      "getStarted": "Get Started",
+      "verifyNow": "Verify Now"
+    },
+    "about": {
+      "title": "About ChainCred",
+      "description": "Fake resumes and forged certificates plague hiring and admissions. ChainCred solves this by leveraging soulbound NFTs and decentralized storage solutions like Greenfield, making credentials tamper-proof and instantly verifiable. We use the BNB ecosystem—including opBNB and Greenfield—for fast, cost-effective, and scalable verification and storage."
+    },
+    "footer": {
+      "github": "GitHub",
+      "docs": "Docs",
+      "privacy": "Privacy",
+      "badge": "Hackathon Badge"
+    }
+  },
+  "dashboard": {
+    "institute": {
+      "title": "Institute Dashboard",
+      "bulkIssuance": "📦 Bulk Issuance",
+      "uploadPdf": "Upload PDF",
+      "studentWallet": "Student Wallet",
+      "uploading": "Uploading...",
+      "uploaded": "Uploaded",
+      "metadataUrl": "metadataUrl:",
+      "fileHash": "fileHash:",
+      "certificateId": "certificateID:",
+      "mintCredential": "Mint Credential",
+      "minting": "Minting...",
+      "issuedCertificates": "Issued Certificates",
+      "certificateId": "CertificateID",
+      "studentName": "Student Name",
+      "studentWallet": "Student Wallet",
+      "txHash": "Tx Hash",
+      "noItems": "No items"
+    },
+    "student": {
+      "title": "Student Dashboard",
+      "myCredentials": "My Credentials",
+      "issuer": "Issuer:",
+      "date": "Date:",
+      "shareLink": "Share Link",
+      "share": "Share:",
+      "noCredentials": "No credentials"
+    },
+    "verify": {
+      "title": "Verify Panel",
+      "placeholder": "Certificate ID or Wallet",
+      "check": "Check",
+      "validCredential": "Valid credential",
+      "invalid": "Invalid",
+      "lookupFailed": "Lookup failed"
+    }
+  },
+  "auth": {
+    "welcome": "Welcome to ChainCred",
+    "selectRole": "Select your role",
+    "institute": "Institute",
+    "student": "Student",
+    "connectWallet": "Connect Wallet",
+    "connecting": "Connecting...",
+    "connected": "Connected",
+    "disconnect": "Disconnect",
+    "pleaseLogin": "Please login to access dashboard (Go to /auth)"
+  },
+  "profile": {
+    "title": "Profile",
+    "personalInfo": "Personal Information",
+    "instituteInfo": "Institute Information",
+    "updateProfile": "Update Profile",
+    "profileUpdated": "Profile updated successfully"
+  },
+  "verify": {
+    "title": "Verify Credential",
+    "enterCertificateId": "Enter Certificate ID or Wallet Address",
+    "verify": "Verify",
+    "verifying": "Verifying...",
+    "result": "Verification Result",
+    "valid": "Valid",
+    "invalid": "Invalid",
+    "notFound": "Not found"
+  },
+  "errors": {
+    "selectFileAndWallet": "Select file and student wallet",
+    "uploadFailed": "Upload failed",
+    "uploadFirst": "Upload first",
+    "mintFailed": "Mint failed",
+    "loggedOutSuccessfully": "Logged out successfully",
+    "failedToLogOut": "Failed to log out"
+  },
+  "languages": {
+    "english": "English",
+    "hindi": "हिन्दी",
+    "selectLanguage": "Select Language"
+  }
+}

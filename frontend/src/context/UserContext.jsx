@@ -1,11 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from '../utils/api';
+import { useTranslation } from 'react-i18next';
 
 const UserContext = createContext(null);
 
 export function UserProvider({ children }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // Initialize user from localStorage
   const [user, setUser] = useState(() => {
@@ -74,11 +76,11 @@ export function UserProvider({ children }) {
       console.log('Logout triggered');
       setUser(null);
       localStorage.removeItem('chaincred_user');
-      showToast('success', 'Logged out successfully');
+      showToast('success', t('errors.loggedOutSuccessfully'));
       navigate('/sign-in');
     } catch (error) {
       console.error('Logout error:', error);
-      showToast('error', 'Failed to log out');
+      showToast('error', t('errors.failedToLogOut'));
     }
   };
 

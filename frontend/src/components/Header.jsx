@@ -1,9 +1,12 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from './LanguageSwitcher';
 
 export default function Header() {
   const { user, logout } = useUser();
   const location = useLocation();
+  const { t } = useTranslation();
 
   // Helper function to determine if a link is active
   const isActive = (path) => {
@@ -26,39 +29,39 @@ export default function Header() {
     <header className="p-4 border-b border-gray-800 bg-black shadow-md">
       <div className="max-w-6xl mx-auto flex justify-between items-center">
         <Link to="/" className="font-bold text-2xl text-[#f3ba2f] tracking-wide flex items-center gap-2">
-          <span role="img" aria-label="BNB">🟡</span> ChainCred
+          <span role="img" aria-label="BNB">🟡</span> {t('header.title')}
         </Link>
         <nav className="flex items-center gap-6">
           <Link 
             to="/" 
             className={getNavLinkClasses('/')}
           >
-            Home
+            {t('common.home')}
           </Link>
           <Link 
             to="/verify" 
             className={getNavLinkClasses('/verify')}
           >
-            Verify
+            {t('common.verify')}
           </Link>
           <Link 
             to="/dashboard-binance" 
             className={getNavLinkClasses('/dashboard-binance')}
           >
-            Dashboard
+            {t('common.dashboard')}
           </Link>
           <Link 
             to="/profile" 
             className={getNavLinkClasses('/profile')}
           >
-            Profile
+            {t('common.profile')}
           </Link>
           {user && user.role === 'institute' && (
             <Link 
               to="/bulk" 
               className={getNavLinkClasses('/bulk')}
             >
-              Bulk
+              {t('common.bulk')}
             </Link>
           )}
           {user && user.role === 'student' && ( // NEW: Conditional for student only
@@ -66,14 +69,14 @@ export default function Header() {
               to="/resume-builder" 
               className={getNavLinkClasses('/resume-builder')}
             >
-              Resume
+              {t('common.resume')}
             </Link>
           )}
           <Link 
             to="/networking" 
             className={`${getNavLinkClasses('/networking')} flex items-center gap-2`}
           >
-            Networking
+            {t('common.networking')}
           </Link>
           {user ? (
             <div className="flex items-center gap-4">
@@ -89,7 +92,7 @@ export default function Header() {
                 }}
                 className="px-4 py-1 rounded-lg font-semibold border-2 border-[#f3ba2f] text-[#f3ba2f] hover:bg-[#f3ba2f] hover:text-black transition-transform transform hover:scale-105"
               >
-                Logout
+                {t('common.logout')}
               </button>
             </div>
           ) : (
@@ -97,9 +100,10 @@ export default function Header() {
               to="/auth-binance"
               className="px-4 py-2 rounded-lg font-semibold bg-[#f3ba2f] text-black hover:bg-yellow-400 transition-all transform hover:scale-105 shadow-lg hover:shadow-yellow-400/50"
             >
-              Sign In
+              {t('common.signIn')}
             </Link>
           )}
+          <LanguageSwitcher />
         </nav>
       </div>
     </header>
