@@ -1,6 +1,6 @@
 const express = require('express');
 const multer = require('multer');
-const Tesseract = require('tesseract.js');
+const OCRService = require('../services/ocrService');
 const router = express.Router();
 
 /**
@@ -19,22 +19,32 @@ router.post('/extract', upload.single('image'), async (req, res) => {
 
     console.log('Processing OCR for image:', req.file.originalname);
 
-    // Use Tesseract.js to extract text from image
-    const { data: { text } } = await Tesseract.recognize(
-      req.file.buffer,
-      'eng',
-      {
-        logger: m => console.log(m) // Log progress
-      }
-    );
+    const ocrService = new OCRService();
+    const result = await ocrService.extractText(req.file.buffer, req.file.mimetype);
 
-    console.log('Extracted text:', text);
+    if (!result.success) {
+      return res.status(500).json({ 
+        success: false, 
+        error: 'OCR processing failed: ' + result.error 
+      });
+    }
+
+    console.log('OCR completed successfully');
+    console.log('Strategy used:', result.data.strategy);
+    console.log('Extracted text:', result.data.text);
+    console.log('Certificate ID:', result.data.certificateId);
 
     return res.json({
       success: true,
       data: {
-        text: text.trim(),
-        confidence: 'OCR processing completed'
+        text: result.data.text,
+        confidence: result.data.confidence,
+        strategy: result.data.strategy,
+        certificateId: result.data.certificateId,
+        studentName: result.data.studentName,
+        course: result.data.course,
+        institution: result.data.institution,
+        date: result.data.date
       }
     });
 
