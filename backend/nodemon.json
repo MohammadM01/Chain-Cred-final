@@ -2,5 +2,5 @@
   "watch": ["src"],
   "ext": "js",
   "ignore": ["node_modules"],
-  "exec": "node --experimental-specifier-resolution=node src/server.js"
+  "exec": "node --experimental-specifier-resolution=node"
 }

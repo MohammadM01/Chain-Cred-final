@@ -12,7 +12,7 @@
     "setup:test-user": "node create-test-user.js"
   },
   "dependencies": {
-    "@bnb-chain/greenfield-js-sdk": "^0.2.0",
+    "@bnb-chain/greenfield-js-sdk": "^0.2.6",
     "@bnb-chain/reed-solomon": "^1.1.4",
     "axios": "^1.7.7",
     "cors": "^2.8.5",

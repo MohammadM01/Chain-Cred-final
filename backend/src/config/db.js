@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const dotenv = require('dotenv');
+const mongoose = require("mongoose");
+const dotenv = require("dotenv");
 
 dotenv.config();
 
@@ -11,17 +11,39 @@ dotenv.config();
  */
 const connectDB = async () => {
   try {
-    const uri = process.env.MONGODB_URI || process.env.MONGO_URI || process.env.DATABASE_URL;
+    const uri =
+      process.env.MONGODB_URI ||
+      process.env.MONGO_URI ||
+      process.env.DATABASE_URL ||
+      "mongodb://localhost:27017/chaincred";
     if (!uri) {
-      console.error('MongoDB connection failed: MONGODB_URI is not set.\nPlease create a .env file in the backend folder with a valid MONGODB_URI, for example:\nMONGODB_URI=mongodb+srv://<user>:<password>@cluster0.mongodb.net/<dbname>?retryWrites=true&w=majority');
+      console.error(
+        "MongoDB connection failed: MONGODB_URI is not set.\nPlease create a .env file in the backend folder with a valid MONGODB_URI, for example:\nMONGODB_URI=mongodb+srv://<user>:<password>@cluster0.mongodb.net/<dbname>?retryWrites=true&w=majority",
+      );
       process.exit(1);
     }
 
-    await mongoose.connect(uri);  // connect using resolved uri
-    console.log('MongoDB connected successfully');
+    try {
+      await mongoose.connect(uri); // connect using resolved uri
+      console.log("MongoDB connected successfully");
+    } catch (error) {
+      console.warn(
+        "Primary MongoDB connection failed, trying local fallback:",
+        error.message,
+      );
+      const localUri = "mongodb://localhost:27017/chaincred";
+      if (uri !== localUri) {
+        await mongoose.connect(localUri);
+        console.log("Connected to LOCAL MongoDB successfully");
+      } else {
+        throw error;
+      }
+    }
   } catch (error) {
-    console.error('MongoDB connection failed:', error.message);
-    process.exit(1); // Exit process with failure for MVP; adjust for production
+    console.error("MongoDB connection failed:", error.message);
+    console.log(
+      "Backend will continue running without database connection for UI testing.",
+    );
   }
 };
 
