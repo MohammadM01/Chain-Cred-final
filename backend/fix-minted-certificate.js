@@ -9,9 +9,16 @@ require('dotenv').config();
 
 async function fixMintedCertificate() {
   try {
-    // Connect to MongoDB
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/chaincred');
-    console.log('✅ Connected to MongoDB');
+    // Connect to MongoDB with fallback
+    const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/chaincred';
+    try {
+      await mongoose.connect(uri);
+      console.log('✅ Connected to MongoDB');
+    } catch (err) {
+      console.warn('⚠️ Primary connection failed, trying local fallback:', err.message);
+      await mongoose.connect('mongodb://localhost:27017/chaincred');
+      console.log('✅ Connected to LOCAL MongoDB');
+    }
 
     // The metadata URL from your minting output
     const metadataUrl = 'https://gnfd-testnet-sp1.bnbchain.org/view/chaincred-1755721751501-q16mk/1755721751501-bfbeb605f2a0e301d2f93f0ffd3adaf6238a8194f1931261c97aef2c2f21c3ed.json';
